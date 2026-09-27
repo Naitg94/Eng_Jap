@@ -43,7 +43,7 @@ const MainApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#faf9f6] text-stone-900 font-sans selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#faf9f6] dark:bg-[#0f0e0d] text-stone-900 dark:text-stone-100 font-sans selection:bg-red-500 selection:text-white transition-colors duration-200">
       {/* Navigation Header */}
       <Navbar />
 

@@ -8,6 +8,8 @@ import {
 } from '../services/storage';
 import { getDueItemsCount } from '../services/spacedRepetition';
 
+export type ThemeMode = 'light' | 'dark';
+
 interface AppContextType {
   dueCount: number;
   refreshStats: () => void;
@@ -18,6 +20,9 @@ interface AppContextType {
   setQuickPracticeConfig: (cfg: Partial<PracticeConfig> | null) => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  theme: ThemeMode;
+  toggleTheme: () => void;
+  setTheme: (theme: ThemeMode) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -27,6 +32,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedModalItem, setSelectedModalItem] = useState<LearningItem | null>(null);
   const [quickPracticeConfig, setQuickPracticeConfig] = useState<Partial<PracticeConfig> | null>(null);
   const [activeTab, setActiveTab] = useState<string>('home');
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem('japanese_theme');
+    if (saved === 'dark' || saved === 'light') return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   const refreshStats = () => {
     const srsStore = loadAllSRSData();
@@ -34,10 +44,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   useEffect(() => {
-    // Keep clean light mode
-    document.documentElement.classList.remove('dark');
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('japanese_theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     refreshStats();
   }, []);
+
+  const toggleTheme = () => {
+    setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  const setTheme = (newTheme: ThemeMode) => {
+    setThemeState(newTheme);
+  };
 
   const openCharacterModal = (item: LearningItem) => {
     setSelectedModalItem(item);
@@ -58,7 +84,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         quickPracticeConfig,
         setQuickPracticeConfig,
         activeTab,
-        setActiveTab
+        setActiveTab,
+        theme,
+        toggleTheme,
+        setTheme
       }}
     >
       {children}

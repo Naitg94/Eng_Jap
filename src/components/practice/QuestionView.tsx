@@ -3,7 +3,7 @@ import type { PracticeQuestion, QuestionResult } from '../../types/learning';
 import { validateAnswer } from '../../services/practiceEngine';
 import { WritingCanvas } from '../writing/WritingCanvas';
 import { PracticeFeedback } from './PracticeFeedback';
-import { SkipForward, X } from 'lucide-react';
+import { SkipForward, X, Sparkles, Send } from 'lucide-react';
 
 interface QuestionViewProps {
   question: PracticeQuestion;
@@ -25,6 +25,7 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
+  const [pendingResult, setPendingResult] = useState<QuestionResult | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Reset state on each new question
@@ -32,8 +33,8 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
     setUserAnswer('');
     setIsAnswered(false);
     setIsCorrect(false);
+    setPendingResult(null);
 
-    // Auto focus text input if available
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
@@ -64,7 +65,7 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
       timestamp: Date.now()
     };
 
-    onRecordResult(result);
+    setPendingResult(result);
   };
 
   const handleConfusableChoice = (chosenChar: string) => {
@@ -87,7 +88,7 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
       timestamp: Date.now()
     };
 
-    onRecordResult(result);
+    setPendingResult(result);
   };
 
   const handleWritingDrawingSubmit = (rating: 'good' | 'poor') => {
@@ -111,7 +112,7 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
       drawingRating: rating
     };
 
-    onRecordResult(result);
+    setPendingResult(result);
   };
 
   const handleSkip = () => {
@@ -133,34 +134,41 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
       timestamp: Date.now()
     };
 
+    // Skip immediately
     onRecordResult(result);
+  };
+
+  const handleNextQuestion = () => {
+    if (pendingResult) {
+      onRecordResult(pendingResult);
+    }
   };
 
   const progressPercent = Math.round((questionNumber / totalQuestions) * 100);
 
   return (
-    <div className="w-full max-w-xl mx-auto py-6 px-4">
-      {/* Top Header & Progress */}
-      <div className="flex items-center justify-between gap-4 mb-4">
+    <div className="w-full max-w-xl mx-auto py-6 sm:py-8 px-3 sm:px-4 animate-fadeIn">
+      {/* Top Header & Progress HUD */}
+      <div className="flex items-center justify-between gap-4 mb-5">
         <button
           onClick={onExitSession}
-          className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+          className="text-stone-400 hover:text-stone-800 dark:hover:text-stone-100 p-2 rounded-xl hover:bg-stone-200/60 dark:hover:bg-stone-800 transition-colors cursor-pointer"
           title="Exit Practice"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Progress bar and counter */}
-        <div className="flex-1 max-w-xs space-y-1 text-center">
-          <div className="flex items-center justify-between text-xs font-semibold text-stone-500">
+        <div className="flex-1 max-w-xs space-y-1.5 text-center">
+          <div className="flex items-center justify-between text-xs font-black text-stone-600 dark:text-stone-400">
             <span>
-              Question {questionNumber} of {totalQuestions}
+              Question <span className="text-red-600 dark:text-red-400">{questionNumber}</span> of {totalQuestions}
             </span>
             <span>{progressPercent}%</span>
           </div>
-          <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
+          <div className="w-full h-2 bg-stone-200 dark:bg-stone-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-red-600 transition-all duration-300 rounded-full"
+              className="h-full bg-gradient-to-r from-red-600 to-rose-600 transition-all duration-300 rounded-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -170,148 +178,125 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
         <button
           onClick={handleSkip}
           disabled={isAnswered}
-          className="flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 disabled:opacity-40 px-2 py-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+          className="flex items-center gap-1 text-xs font-bold text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 disabled:opacity-30 p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
         >
-          <span>Skip</span>
-          <SkipForward className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Skip</span>
+          <SkipForward className="w-4 h-4" />
         </button>
       </div>
 
       {/* Main Question Card */}
-      <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-sm p-6 sm:p-8 flex flex-col items-center text-center">
-        {/* Type Badge */}
-        <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 mb-4 border border-stone-200/80 dark:border-stone-700/80">
-          {question.type === 'confusable'
-            ? 'Confusable Pairs Drill'
-            : question.type === 'writing'
-            ? 'Writing Practice'
-            : question.type === 'combinations'
-            ? 'Combination Drill'
-            : question.type === 'words'
-            ? 'Beginner Vocabulary'
-            : 'Hiragana Recognition'}
-        </span>
+      <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/90 dark:border-stone-800 shadow-xl shadow-stone-900/5 dark:shadow-stone-950/40 p-6 sm:p-8 space-y-6">
+        {/* Question Type Pill */}
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200/80 dark:border-stone-700">
+            <Sparkles className="w-3 h-3 text-red-600 dark:text-red-400" />
+            {question.type === 'characters'
+              ? 'Single Kana Drill'
+              : question.type === 'writing'
+              ? 'Stroke Order & Writing'
+              : question.type === 'confusable'
+              ? 'Confusable Pairs Test'
+              : question.type === 'combinations'
+              ? 'Sound Combination'
+              : 'Vocabulary Word'}
+          </span>
 
-        {/* Prompt Subtext */}
-        {question.promptSubtext && (
-          <p className="text-xs text-stone-500 dark:text-stone-400 mb-3 font-medium">
-            {question.promptSubtext}
+          <span className="text-[11px] font-bold text-stone-400 dark:text-stone-500">
+            {question.direction === 'hiragana-to-romaji'
+              ? 'Hiragana → Romaji'
+              : 'Romaji → Hiragana'}
+          </span>
+        </div>
+
+        {/* Prompt Header */}
+        <div className="text-center space-y-2">
+          <p className="text-xs sm:text-sm font-bold text-stone-500 dark:text-stone-400">
+            {question.direction === 'hiragana-to-romaji'
+              ? 'What is the romaji reading for:'
+              : 'Identify or write the hiragana for:'}
           </p>
-        )}
 
-        {/* Target Character / Word Prompt */}
-        {question.type !== 'confusable' && (
-          <div className="my-2 select-none">
-            {question.direction === 'hiragana-to-romaji' ? (
-              <span className="text-6xl sm:text-7xl font-bold font-serif text-stone-900 dark:text-stone-100">
-                {question.prompt}
-              </span>
-            ) : (
-              <div className="flex flex-col items-center">
-                <span className="text-4xl sm:text-5xl font-black font-sans text-red-600 dark:text-red-400">
-                  {question.prompt}
-                </span>
-                {question.type === 'writing' && (
-                  <span className="text-xs text-stone-400 font-medium mt-1">
-                    Draw this character below
+          {/* Big Visual Prompt */}
+          <div className="text-6xl sm:text-7xl md:text-8xl font-black font-serif text-stone-900 dark:text-stone-100 py-2 select-none drop-shadow-sm">
+            {question.prompt}
+          </div>
+        </div>
+
+        {/* Question Body Depending on Type */}
+        {question.type === 'writing' ? (
+          /* Interactive Drawing Canvas */
+          <WritingCanvas
+            character={question.expectedAnswer}
+            romaji={question.prompt}
+            strokeSteps={question.targetItem?.strokeSteps || []}
+            onSubmitDrawing={handleWritingDrawingSubmit}
+            disabled={isAnswered}
+          />
+        ) : question.type === 'confusable' && question.options ? (
+          /* Confusable Multiple Choice Buttons */
+          <div className="space-y-3 pt-2">
+            <div className="grid grid-cols-2 gap-3">
+              {question.options.map((optionChar) => (
+                <button
+                  key={optionChar}
+                  onClick={() => handleConfusableChoice(optionChar)}
+                  disabled={isAnswered}
+                  className={`p-5 rounded-2xl border-2 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                    isAnswered && optionChar === question.expectedAnswer
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-500 text-emerald-800 dark:text-emerald-300'
+                      : isAnswered && optionChar === userAnswer && !isCorrect
+                      ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-500 text-rose-800 dark:text-rose-300'
+                      : 'bg-stone-50 dark:bg-stone-800/80 border-stone-200 dark:border-stone-700 hover:border-red-500 dark:hover:border-red-500 hover:bg-white dark:hover:bg-stone-800 text-stone-900 dark:text-stone-100 hover:scale-[1.02]'
+                  }`}
+                >
+                  <span className="text-4xl sm:text-5xl font-bold font-serif">
+                    {optionChar}
                   </span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Input Modes */}
-
-        {/* 1. Writing Mode Canvas */}
-        {question.type === 'writing' && question.targetItem && (
-          <div className="w-full mt-4">
-            <WritingCanvas
-              character={question.targetItem.character}
-              romaji={question.targetItem.romaji}
-              strokeSteps={question.targetItem.strokeSteps}
-              onSubmitDrawing={handleWritingDrawingSubmit}
-              disabled={isAnswered}
-            />
-          </div>
-        )}
-
-        {/* 2. Confusable Pair Multiple Choice */}
-        {question.type === 'confusable' && question.options && (
-          <div className="w-full mt-4 space-y-4">
-            <div className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-              {question.prompt}
+                </button>
+              ))}
             </div>
-
-            <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
-              {question.options.map((optChar) => {
-                const isSelected = userAnswer === optChar;
-                return (
-                  <button
-                    key={optChar}
-                    type="button"
-                    onClick={() => handleConfusableChoice(optChar)}
-                    disabled={isAnswered}
-                    className={`aspect-square rounded-3xl border-2 text-6xl font-bold font-serif transition-all flex items-center justify-center p-4 ${
-                      isSelected
-                        ? isCorrect
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
-                          : 'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'
-                        : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 hover:border-red-500 hover:scale-105 active:scale-95'
-                    }`}
-                  >
-                    {optChar}
-                  </button>
-                );
-              })}
-            </div>
+            <p className="text-[11px] text-center text-stone-400">
+              Pick the correct character matching the sound "{question.prompt}"
+            </p>
           </div>
-        )}
-
-        {/* 3. Text Input Mode (Characters, Combinations, Words, Reverse direction) */}
-        {question.type !== 'writing' && question.type !== 'confusable' && (
-          <form onSubmit={handleSubmitTextAnswer} className="w-full max-w-xs mt-6 space-y-3">
-            <div className="relative">
+        ) : (
+          /* Standard Romaji / Word Text Input */
+          <form onSubmit={handleSubmitTextAnswer} className="space-y-3 pt-2">
+            <div className="relative flex items-center">
               <input
                 ref={inputRef}
                 type="text"
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
                 disabled={isAnswered}
-                placeholder={
-                  question.direction === 'hiragana-to-romaji'
-                    ? 'Type romaji (e.g. sa)...'
-                    : 'Type hiragana character...'
-                }
+                placeholder="Type reading in romaji (e.g. ka)..."
                 autoComplete="off"
-                autoCorrect="off"
+                autoCapitalize="none"
                 spellCheck="false"
-                className="w-full px-4 py-3 rounded-2xl border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-center font-bold text-lg focus:outline-hidden focus:border-red-500 focus:bg-white dark:focus:bg-stone-900 transition-all disabled:opacity-60"
+                className="w-full px-5 py-4 rounded-2xl border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/80 text-lg font-mono font-bold text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-hidden focus:border-red-600 focus:ring-4 focus:ring-red-600/15 transition-all shadow-inner"
               />
-            </div>
 
-            {!isAnswered && (
               <button
                 type="submit"
-                disabled={!userAnswer.trim()}
-                className="w-full py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-md shadow-red-600/20 disabled:opacity-40 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                disabled={!userAnswer.trim() || isAnswered}
+                className="absolute right-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs flex items-center gap-1.5 disabled:opacity-40 transition-all cursor-pointer shadow-xs"
               >
-                Submit Answer
+                <span>Submit</span>
+                <Send className="w-3.5 h-3.5" />
               </button>
-            )}
+            </div>
           </form>
         )}
       </div>
 
-      {/* Immediate Feedback Card */}
+      {/* Immediate Instant Feedback Banner */}
       {isAnswered && (
         <PracticeFeedback
           question={question}
           userAnswer={userAnswer}
           isCorrect={isCorrect}
-          onNextQuestion={() => {
-            // Handled in parent
-          }}
+          onNextQuestion={handleNextQuestion}
           isLastQuestion={isLastQuestion}
         />
       )}

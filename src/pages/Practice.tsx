@@ -21,7 +21,7 @@ import {
 } from '../services/scoring';
 import { saveSessionSummary } from '../services/storage';
 import { useApp } from '../context/AppContext';
-import { Play, AlertTriangle } from 'lucide-react';
+import { Play, AlertTriangle, Dumbbell } from 'lucide-react';
 
 export const Practice: React.FC = () => {
   const { quickPracticeConfig, setQuickPracticeConfig, dueCount, refreshStats } = useApp();
@@ -49,7 +49,7 @@ export const Practice: React.FC = () => {
   const [isIndividualSelectorOpen, setIsIndividualSelectorOpen] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Listen for quick practice config passed from other pages (e.g. "Practice Weak Characters")
+  // Listen for quick practice config passed from other pages
   useEffect(() => {
     if (quickPracticeConfig) {
       if (quickPracticeConfig.selectedItemIds) {
@@ -111,7 +111,6 @@ export const Practice: React.FC = () => {
   };
 
   const handleRecordResult = (result: QuestionResult) => {
-    // Record into SRS, streak, mistakes immediately
     recordQuestionResult(result);
     recordActivityForStreak();
     refreshStats();
@@ -119,7 +118,6 @@ export const Practice: React.FC = () => {
     const updatedResults = [...sessionResults, result];
     setSessionResults(updatedResults);
 
-    // Advance to next question or complete session
     if (currentQuestionIndex + 1 < questions.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
@@ -177,7 +175,6 @@ export const Practice: React.FC = () => {
     setSessionSource('random');
     setCompletedSummary(null);
 
-    // Launch immediately
     try {
       const config: PracticeConfig = {
         selectedItemIds: mistakeItemIds,
@@ -227,32 +224,43 @@ export const Practice: React.FC = () => {
 
   // Otherwise, render Practice Setup Configurator
   return (
-    <div className="w-full max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-8 animate-fadeIn">
+    <div className="w-full max-w-4xl mx-auto py-6 sm:py-8 px-3 sm:px-6 space-y-6 sm:space-y-8 animate-fadeIn">
       {/* Title Header */}
       <div>
-        <h2 className="text-3xl font-black text-stone-900 dark:text-stone-100 tracking-tight">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/60">
+            <Dumbbell className="w-3 h-3" />
+            Custom Quiz Drill
+          </span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-stone-100 tracking-tight">
           Create Practice Session
         </h2>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-          Customize every aspect of your practice: choose groups, question types, direction, and difficulty.
+        <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-1">
+          Customize every parameter: choose groups, question types, direction, and difficulty.
         </p>
       </div>
 
-      {/* Error Alert if any */}
+      {/* Error Alert */}
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+        <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-900/80 text-rose-800 dark:text-rose-300 text-xs sm:text-sm flex items-center gap-2.5 shadow-xs">
+          <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {/* 1. Group Selection */}
-      <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-stone-900 dark:text-stone-100">
-            1. Select Hiragana Pool
-          </h3>
-          <span className="text-xs text-stone-400">
+      <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/90 dark:border-stone-800 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-stone-100 dark:border-stone-800">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center">
+              1
+            </span>
+            <h3 className="text-base font-black text-stone-900 dark:text-stone-100">
+              Select Hiragana Pool
+            </h3>
+          </div>
+          <span className="text-xs text-stone-500 dark:text-stone-400">
             Choose whole rows or individual characters
           </span>
         </div>
@@ -265,45 +273,52 @@ export const Practice: React.FC = () => {
       </section>
 
       {/* 2. Content Type */}
-      <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs space-y-4">
-        <h3 className="text-base font-extrabold text-stone-900 dark:text-stone-100">
-          2. Practice Content Type
-        </h3>
-        <p className="text-xs text-stone-500">
-          Select one or combine multiple formats to test reading, writing, and discrimination
-        </p>
+      <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/90 dark:border-stone-800 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
+          <span className="w-6 h-6 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center">
+            2
+          </span>
+          <div>
+            <h3 className="text-base font-black text-stone-900 dark:text-stone-100">
+              Practice Question Types
+            </h3>
+            <p className="text-xs text-stone-500 dark:text-stone-400">
+              Select one or combine multiple formats to drill reading, writing, and recognition
+            </p>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[
             {
               id: 'characters',
-              title: 'Characters',
-              desc: 'Single Hiragana sound prompt'
+              title: 'Single Characters',
+              desc: 'Recognize single kana sounds'
             },
             {
               id: 'writing',
               title: 'Writing Practice',
-              desc: 'Draw / trace on interactive canvas'
+              desc: 'Draw & trace kana on interactive canvas'
             },
             {
               id: 'combinations',
-              title: 'Combinations',
+              title: 'Sound Combinations',
               desc: 'Multi-character strings from pool'
             },
             {
               id: 'confusable',
               title: 'Confusable Pairs',
-              desc: 'Drill visually similar characters'
+              desc: 'Drill visually similar characters (e.g. さ/ち, は/ほ)'
             },
             {
               id: 'words',
-              title: 'Words (Vocabulary)',
-              desc: 'Real words matching your selected pool'
+              title: 'Vocabulary Words',
+              desc: 'Real words matching selected pool'
             },
             {
               id: 'mixed',
               title: 'Mixed Mode',
-              desc: 'Combines all question formats'
+              desc: 'Combines all quiz formats randomly'
             }
           ].map((type) => {
             const isSelected = questionTypes.includes(type.id as PracticeContentType);
@@ -312,17 +327,29 @@ export const Practice: React.FC = () => {
                 key={type.id}
                 type="button"
                 onClick={() => toggleContentType(type.id as PracticeContentType)}
-                className={`p-3.5 rounded-2xl border text-left transition-all ${
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start justify-between gap-2 ${
                   isSelected
-                    ? 'bg-red-50 dark:bg-red-950/40 border-red-500 text-red-700 dark:text-red-300 shadow-xs'
-                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-stone-300'
+                    ? 'bg-red-50/90 dark:bg-red-950/40 border-red-500 text-red-900 dark:text-red-200 shadow-xs scale-[1.01]'
+                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700/80 text-stone-700 dark:text-stone-300 hover:border-stone-300'
                 }`}
               >
-                <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                  {type.title}
+                <div>
+                  <div className="text-xs sm:text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                    {type.title}
+                  </div>
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
+                    {type.desc}
+                  </div>
                 </div>
-                <div className="text-[11px] text-stone-500 mt-0.5 leading-snug">
-                  {type.desc}
+
+                <div
+                  className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold transition-all ${
+                    isSelected
+                      ? 'bg-red-600 text-white'
+                      : 'border border-stone-300 dark:border-stone-600 text-transparent'
+                  }`}
+                >
+                  ✓
                 </div>
               </button>
             );
@@ -332,7 +359,7 @@ export const Practice: React.FC = () => {
         {/* Combination Length Option */}
         {questionTypes.includes('combinations') && (
           <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-stone-600 dark:text-stone-400">
+            <span className="text-xs font-bold text-stone-700 dark:text-stone-300">
               Combination Length:
             </span>
             {(['2', '3', '4', 'mixed'] as const).map((len) => (
@@ -340,10 +367,10 @@ export const Practice: React.FC = () => {
                 key={len}
                 type="button"
                 onClick={() => setCombinationLength(len)}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   combinationLength === len
                     ? 'bg-red-600 text-white shadow-xs'
-                    : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200'
+                    : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700'
                 }`}
               >
                 {len === 'mixed' ? 'Mixed Length' : `${len} characters`}
@@ -354,64 +381,92 @@ export const Practice: React.FC = () => {
       </section>
 
       {/* 3. Direction & Difficulty Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         {/* Direction */}
-        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs space-y-3">
-          <h3 className="text-base font-extrabold text-stone-900 dark:text-stone-100">
-            3. Question Direction
-          </h3>
+        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/90 dark:border-stone-800 p-5 sm:p-6 shadow-xs space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
+            <span className="w-6 h-6 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center">
+              3
+            </span>
+            <h3 className="text-base font-black text-stone-900 dark:text-stone-100">
+              Question Direction
+            </h3>
+          </div>
 
           <div className="space-y-2">
             {[
-              { id: 'hiragana-to-romaji', label: 'Hiragana → Romaji', desc: 'See kana, identify sound' },
-              { id: 'romaji-to-hiragana', label: 'Romaji → Hiragana', desc: 'See sound, write / pick kana' },
+              { id: 'hiragana-to-romaji', label: 'Hiragana → Romaji', desc: 'See kana glyph, identify reading' },
+              { id: 'romaji-to-hiragana', label: 'Romaji → Hiragana', desc: 'See reading, pick or write kana' },
               { id: 'mixed', label: 'Mixed Direction', desc: 'Randomly alternates both directions' }
             ].map((dir) => (
               <button
                 key={dir.id}
                 type="button"
                 onClick={() => setDirections([dir.id as QuestionDirection])}
-                className={`w-full p-3 rounded-2xl border text-left transition-all ${
+                className={`w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                   directions[0] === dir.id
-                    ? 'bg-red-50 dark:bg-red-950/40 border-red-500 text-red-700 dark:text-red-300 shadow-xs'
-                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-stone-300'
+                    ? 'bg-red-50/90 dark:bg-red-950/40 border-red-500 text-red-900 dark:text-red-200 shadow-xs'
+                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700/80 text-stone-700 dark:text-stone-300 hover:border-stone-300'
                 }`}
               >
-                <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                  {dir.label}
+                <div>
+                  <div className="text-xs sm:text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                    {dir.label}
+                  </div>
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">{dir.desc}</div>
                 </div>
-                <div className="text-[11px] text-stone-500">{dir.desc}</div>
+                <div
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    directions[0] === dir.id ? 'border-red-600 bg-red-600' : 'border-stone-300 dark:border-stone-600'
+                  }`}
+                >
+                  {directions[0] === dir.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                </div>
               </button>
             ))}
           </div>
         </section>
 
         {/* Difficulty */}
-        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs space-y-3">
-          <h3 className="text-base font-extrabold text-stone-900 dark:text-stone-100">
-            4. Difficulty Level
-          </h3>
+        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/90 dark:border-stone-800 p-5 sm:p-6 shadow-xs space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
+            <span className="w-6 h-6 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center">
+              4
+            </span>
+            <h3 className="text-base font-black text-stone-900 dark:text-stone-100">
+              Difficulty Level
+            </h3>
+          </div>
 
           <div className="space-y-2">
             {[
-              { id: 'easy', label: 'Easy', desc: 'Mostly individual characters, familiar items' },
-              { id: 'normal', label: 'Normal', desc: 'Balanced mix of characters and combinations' },
-              { id: 'hard', label: 'Hard', desc: 'More reverse questions, confusables, and weak items' }
+              { id: 'easy', label: 'Easy', desc: 'Single characters & familiar sounds' },
+              { id: 'normal', label: 'Normal', desc: 'Balanced combination & random pool' },
+              { id: 'hard', label: 'Hard', desc: 'Reverse questions, confusables & weak items' }
             ].map((diff) => (
               <button
                 key={diff.id}
                 type="button"
                 onClick={() => setDifficulty(diff.id as DifficultyLevel)}
-                className={`w-full p-3 rounded-2xl border text-left transition-all ${
+                className={`w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                   difficulty === diff.id
-                    ? 'bg-red-50 dark:bg-red-950/40 border-red-500 text-red-700 dark:text-red-300 shadow-xs'
-                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-stone-300'
+                    ? 'bg-red-50/90 dark:bg-red-950/40 border-red-500 text-red-900 dark:text-red-200 shadow-xs'
+                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700/80 text-stone-700 dark:text-stone-300 hover:border-stone-300'
                 }`}
               >
-                <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                  {diff.label}
+                <div>
+                  <div className="text-xs sm:text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                    {diff.label}
+                  </div>
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">{diff.desc}</div>
                 </div>
-                <div className="text-[11px] text-stone-500">{diff.desc}</div>
+                <div
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    difficulty === diff.id ? 'border-red-600 bg-red-600' : 'border-stone-300 dark:border-stone-600'
+                  }`}
+                >
+                  {difficulty === diff.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                </div>
               </button>
             ))}
           </div>
@@ -419,23 +474,28 @@ export const Practice: React.FC = () => {
       </div>
 
       {/* 4. Question Count & Session Source */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         {/* Question Count */}
-        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs space-y-3">
-          <h3 className="text-base font-extrabold text-stone-900 dark:text-stone-100">
-            5. Number of Questions
-          </h3>
+        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/90 dark:border-stone-800 p-5 sm:p-6 shadow-xs space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
+            <span className="w-6 h-6 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center">
+              5
+            </span>
+            <h3 className="text-base font-black text-stone-900 dark:text-stone-100">
+              Number of Questions
+            </h3>
+          </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-1">
             {[5, 10, 15, 20, 30, 50].map((cnt) => (
               <button
                 key={cnt}
                 type="button"
                 onClick={() => setQuestionCount(cnt)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 min-w-[50px] py-3 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
                   questionCount === cnt
-                    ? 'bg-red-600 text-white shadow-xs'
-                    : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200'
+                    ? 'bg-red-600 text-white shadow-md shadow-red-600/20 scale-[1.02]'
+                    : 'bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200/60 dark:border-stone-700'
                 }`}
               >
                 {cnt}
@@ -445,36 +505,41 @@ export const Practice: React.FC = () => {
         </section>
 
         {/* Session Source */}
-        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-6 shadow-xs space-y-3">
-          <h3 className="text-base font-extrabold text-stone-900 dark:text-stone-100">
-            6. Question Order / Source
-          </h3>
+        <section className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200/90 dark:border-stone-800 p-5 sm:p-6 shadow-xs space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
+            <span className="w-6 h-6 rounded-full bg-red-600 text-white font-black text-xs flex items-center justify-center">
+              6
+            </span>
+            <h3 className="text-base font-black text-stone-900 dark:text-stone-100">
+              Question Order / Source
+            </h3>
+          </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 pt-1">
             {[
-              { id: 'random', label: 'Random', desc: 'Randomly chosen from pool' },
-              { id: 'sequential', label: 'Sequential', desc: 'Follows kana table order' },
-              { id: 'weak', label: 'Weak Characters', desc: 'Prioritizes characters you miss' },
+              { id: 'random', label: 'Random', desc: 'Uniform random selection' },
+              { id: 'sequential', label: 'Sequential', desc: 'Table kana order' },
+              { id: 'weak', label: 'Weak Kana', desc: 'Prioritizes missed items' },
               {
                 id: 'due',
                 label: 'Due for Review',
-                desc: `${dueCount} due today (SRS schedule)`
+                desc: `${dueCount} due today (SRS)`
               }
             ].map((src) => (
               <button
                 key={src.id}
                 type="button"
                 onClick={() => setSessionSource(src.id as SessionSource)}
-                className={`p-2.5 rounded-2xl border text-left transition-all ${
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                   sessionSource === src.id
-                    ? 'bg-red-50 dark:bg-red-950/40 border-red-500 text-red-700 dark:text-red-300 shadow-xs'
-                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:border-stone-300'
+                    ? 'bg-red-50/90 dark:bg-red-950/40 border-red-500 text-red-900 dark:text-red-200 shadow-xs'
+                    : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700/80 text-stone-700 dark:text-stone-300 hover:border-stone-300'
                 }`}
               >
-                <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                <div className="text-xs font-extrabold text-stone-900 dark:text-stone-100">
                   {src.label}
                 </div>
-                <div className="text-[10px] text-stone-500 mt-0.5 leading-tight">
+                <div className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 leading-tight">
                   {src.desc}
                 </div>
               </button>
@@ -484,13 +549,13 @@ export const Practice: React.FC = () => {
       </div>
 
       {/* Start Practice Session Big CTA */}
-      <div className="pt-4">
+      <div className="pt-2">
         <button
           onClick={handleStartPractice}
           disabled={selectedItemIds.length === 0}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-extrabold text-base shadow-lg shadow-red-600/25 flex items-center justify-center gap-2.5 disabled:opacity-40 hover:scale-[1.005] active:scale-[0.995] transition-all"
+          className="w-full py-4 sm:py-5 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-base sm:text-lg shadow-xl shadow-red-600/30 flex items-center justify-center gap-3 disabled:opacity-40 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
         >
-          <Play className="w-5 h-5 fill-current" />
+          <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
           <span>Start Practice Session ({questionCount} Questions)</span>
         </button>
       </div>
