@@ -5,8 +5,10 @@ import {
   DAKUTEN_ROWS,
   HANDAKUTEN_ROWS,
   YOON_GROUPS,
-  HIRAGANA_BY_ID
+  HIRAGANA_BY_ID,
+  HIRAGANA_BY_CHAR
 } from '../data/hiraganaMaster';
+import { getCharacterDakutenInfo } from '../data/dakutenRelationships';
 import {
   generatePracticeQuestions,
   validateAnswer,
@@ -422,3 +424,74 @@ describe('Backup and Restore (§31)', () => {
     expect(res2.success).toBe(false);
   });
 });
+
+describe('Dakuten Relationships Engine', () => {
+  it('returns null for vowels and characters that have no dakuten', () => {
+    ['あ', 'い', 'う', 'え', 'お', 'な', 'ま', 'や', 'ら', 'わ', 'ん'].forEach((char) => {
+      const item = HIRAGANA_BY_CHAR.get(char);
+      expect(item).toBeDefined();
+      const info = getCharacterDakutenInfo(item);
+      expect(info).toBeNull();
+    });
+  });
+
+  it('correctly maps K-row character (か) to its voiced dakuten (が)', () => {
+    const ka = HIRAGANA_BY_CHAR.get('か');
+    const info = getCharacterDakutenInfo(ka);
+    expect(info).not.toBeNull();
+    expect(info?.category).toBe('base-with-dakuten');
+    expect(info?.variants.length).toBe(1);
+    expect(info?.variants[0].item.character).toBe('が');
+    expect(info?.variants[0].type).toBe('dakuten');
+    expect(info?.variants[0].formula).toContain('か (ka) + ゛');
+  });
+
+  it('correctly maps H-row character (は) to both dakuten (ば) and handakuten (ぱ)', () => {
+    const ha = HIRAGANA_BY_CHAR.get('は');
+    const info = getCharacterDakutenInfo(ha);
+    expect(info).not.toBeNull();
+    expect(info?.category).toBe('base-with-dakuten');
+    expect(info?.variants.length).toBe(2);
+
+    const dakutenVar = info?.variants.find((v) => v.type === 'dakuten');
+    const handakutenVar = info?.variants.find((v) => v.type === 'handakuten');
+
+    expect(dakutenVar?.item.character).toBe('ば');
+    expect(handakutenVar?.item.character).toBe('ぱ');
+  });
+
+  it('correctly maps dakuten character (が) back to base (か)', () => {
+    const ga = HIRAGANA_BY_CHAR.get('が');
+    const info = getCharacterDakutenInfo(ga);
+    expect(info).not.toBeNull();
+    expect(info?.category).toBe('dakuten-character');
+    expect(info?.variants[0].item.character).toBe('か');
+    expect(info?.variants[0].type).toBe('base');
+  });
+
+  it('correctly maps handakuten character (ぱ) back to base (は) and related dakuten (ば)', () => {
+    const pa = HIRAGANA_BY_CHAR.get('ぱ');
+    const info = getCharacterDakutenInfo(pa);
+    expect(info).not.toBeNull();
+    expect(info?.category).toBe('handakuten-character');
+
+    const baseVar = info?.variants.find((v) => v.type === 'base');
+    const dakutenVar = info?.variants.find((v) => v.type === 'dakuten');
+
+    expect(baseVar?.item.character).toBe('は');
+    expect(dakutenVar?.item.character).toBe('ば');
+  });
+
+  it('correctly maps contracted yoon characters (きゃ -> ぎゃ, and ぎゃ -> きゃ)', () => {
+    const kya = HIRAGANA_BY_CHAR.get('きゃ');
+    const kyaInfo = getCharacterDakutenInfo(kya);
+    expect(kyaInfo).not.toBeNull();
+    expect(kyaInfo?.variants[0].item.character).toBe('ぎゃ');
+
+    const gya = HIRAGANA_BY_CHAR.get('ぎゃ');
+    const gyaInfo = getCharacterDakutenInfo(gya);
+    expect(gyaInfo).not.toBeNull();
+    expect(gyaInfo?.variants[0].item.character).toBe('きゃ');
+  });
+});
+

@@ -14,6 +14,7 @@ const MainApp: React.FC = () => {
     activeTab,
     setActiveTab,
     selectedModalItem,
+    openCharacterModal,
     closeCharacterModal,
     setQuickPracticeConfig
   } = useApp();
@@ -62,6 +63,7 @@ const MainApp: React.FC = () => {
       <CharacterCardModal
         item={selectedModalItem}
         onClose={closeCharacterModal}
+        onSelectCharacter={openCharacterModal}
         onPracticeWriting={handlePracticeWriting}
         onPracticeRecognition={handlePracticeRecognition}
       />

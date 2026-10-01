@@ -194,7 +194,7 @@ export const QuestionView: React.FC<QuestionViewProps> = ({
             {question.type === 'characters'
               ? 'Single Kana Drill'
               : question.type === 'writing'
-              ? 'Stroke Order & Writing'
+              ? 'Handwriting Practice'
               : question.type === 'confusable'
               ? 'Confusable Pairs Test'
               : question.type === 'combinations'

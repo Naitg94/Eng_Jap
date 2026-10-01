@@ -36,7 +36,7 @@ export const Home: React.FC = () => {
         </h1>
 
         <p className="text-sm sm:text-base md:text-lg text-stone-600 dark:text-stone-300 max-w-2xl mx-auto leading-relaxed">
-          Master 104 Hiragana characters through interactive charts, stroke order animations, handwriting canvas, and SM-2 spaced repetition drills.
+          Master 104 Hiragana characters through interactive charts, mnemonics, dakuten variants, handwriting canvas, and SM-2 spaced repetition drills.
         </p>
 
         {/* Quick Launch Buttons */}
@@ -97,7 +97,7 @@ export const Home: React.FC = () => {
               Study Chart
             </h3>
             <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
-              Explore 46 basic characters, 20 voiced dakuten, 5 handakuten, and 33 contracted yōon with visual stroke animations and audio hints.
+              Explore 46 basic characters, 20 voiced dakuten, 5 handakuten, and 33 contracted yōon with mnemonics, dakuten variants, and audio hints.
             </p>
           </div>
 

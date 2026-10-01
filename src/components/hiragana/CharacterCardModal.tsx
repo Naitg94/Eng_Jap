@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import type { LearningItem } from '../../types/learning';
-import { StrokeOrderViewer } from './StrokeOrderViewer';
+import { CharacterDakutenSection } from './CharacterDakutenSection';
 import { X, Sparkles, BookOpen, PenTool, ArrowRight } from 'lucide-react';
 
 interface CharacterCardModalProps {
   item: LearningItem | null;
   onClose: () => void;
+  onSelectCharacter?: (item: LearningItem) => void;
   onPracticeWriting: (item: LearningItem) => void;
   onPracticeRecognition: (item: LearningItem) => void;
 }
@@ -13,6 +14,7 @@ interface CharacterCardModalProps {
 export const CharacterCardModal: React.FC<CharacterCardModalProps> = ({
   item,
   onClose,
+  onSelectCharacter,
   onPracticeWriting,
   onPracticeRecognition
 }) => {
@@ -29,7 +31,10 @@ export const CharacterCardModal: React.FC<CharacterCardModalProps> = ({
   if (!item) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/70 dark:bg-black/80 backdrop-blur-xs animate-fadeIn">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/70 dark:bg-black/80 backdrop-blur-xs animate-fadeIn"
+      onClick={onClose}
+    >
       <div
         className="relative w-full max-w-lg bg-stone-50 dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
@@ -55,7 +60,7 @@ export const CharacterCardModal: React.FC<CharacterCardModalProps> = ({
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="overflow-y-auto px-5 sm:px-6 py-4 space-y-5">
+        <div className="overflow-y-auto px-5 sm:px-6 py-4 space-y-4">
           {/* Main Character Hero Display */}
           <div className="flex flex-col sm:flex-row items-center gap-5 p-4 sm:p-5 rounded-2xl bg-white dark:bg-stone-800/70 border border-stone-200/80 dark:border-stone-700 shadow-xs">
             {/* Huge Character Block */}
@@ -105,6 +110,12 @@ export const CharacterCardModal: React.FC<CharacterCardModalProps> = ({
             </p>
           </div>
 
+          {/* Dakuten / Voiced Variants Section (shows if dakuten exists) */}
+          <CharacterDakutenSection
+            item={item}
+            onSelectCharacter={onSelectCharacter}
+          />
+
           {/* Example Word */}
           <div className="p-4 rounded-2xl bg-white dark:bg-stone-800/70 border border-stone-200/80 dark:border-stone-700/80 flex items-center justify-between shadow-xs">
             <div className="space-y-0.5">
@@ -133,18 +144,6 @@ export const CharacterCardModal: React.FC<CharacterCardModalProps> = ({
               {item.notes}
             </div>
           )}
-
-          {/* Stroke Order Section */}
-          <div className="pt-1">
-            <h4 className="text-xs font-black uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3 text-center">
-              Step-by-Step Stroke Order
-            </h4>
-            <StrokeOrderViewer
-              character={item.character}
-              strokeSteps={item.strokeSteps}
-              size={200}
-            />
-          </div>
         </div>
 
         {/* Action Buttons in Footer */}

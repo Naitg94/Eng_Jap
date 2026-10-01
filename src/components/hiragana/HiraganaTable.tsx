@@ -125,7 +125,7 @@ export const HiraganaTable: React.FC<HiraganaTableProps> = ({ onSelectCharacter 
                 </span>
                 <span className="flex items-center gap-1 text-[11px] text-stone-400">
                   <Info className="w-3.5 h-3.5" />
-                  Tap any card for stroke order & mnemonics
+                  Tap any card for mnemonics & dakuten variants
                 </span>
               </div>
 

@@ -23,7 +23,7 @@ export const Learn: React.FC = () => {
             Learn Japanese Script
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-1">
-            Interactive chart with stroke orders, mnemonics, audio hints, and mastery tracking.
+            Interactive chart with mnemonics, dakuten variants, audio hints, and mastery tracking.
           </p>
         </div>
 
